@@ -1,0 +1,201 @@
+syntax = "proto3";
+
+package user.v1;
+
+// FIXME 服务必须写注释
+service User {
+    // @auth
+    rpc Info(InfoReq) returns (InfoResp); // sniper:foo
+    // 上报位置
+    // @auth
+    rpc ReportLocation(ReportLocationReq) returns (DefaultEmptyResp); // sniper:foo
+    // @auth
+    rpc UpdateInfo(UpdateInfoReq) returns (DefaultEmptyResp); // sniper:foo
+    // 实名认证
+    // @auth
+    rpc CheckRp(CheckRpReq) returns (DefaultEmptyResp); // sniper:foo
+    // 添加标签
+    // @auth
+    rpc AddLabels(AddLabelsReq) returns (DefaultEmptyResp);
+    // 上报推送cid
+    // @auth
+    rpc ReportPushId(ReportPushIdReq) returns (DefaultEmptyResp);
+}
+
+message AddLabelsReq {
+    // 0 添加 1 删除
+    int32 type = 1;
+    repeated int32 ids = 2;   
+}
+
+message ReportPushIdReq {
+    string cid = 1;
+}
+
+message Label {
+    int32 id = 1;
+}
+
+message UpdateInfoReq {
+    Basic basic = 1;
+    string background = 2;
+    string voice = 3;
+    string intro = 4;
+    repeated Label labels = 5;
+    // @in:["", "白羊座", "金牛座", "双子座", "巨蟹座", "狮子座", "处女座", "天秤座", "天蝎座", "射手座", "摩羯座", "水瓶座", "双鱼座"]
+    string constellation = 6; // 星座
+    // 职业 职位列表：https://github.com/PowersYang/Industry-Job/blob/master/industry.json 
+    string job_occupation = 7;
+    // 学历 0 未选择 1 大专以下，2 大专，3 本科，4 硕士，5 博士。
+    int32 education = 8;
+    // https://github.com/codeudan/crawler-china-mainland-universities/blob/master/china_mainland_universities.json
+    string school = 9;
+    // 0: 没有选择
+    // 1: 5万以下 2: 5-10万，3: 10-20万，4: 20-30万，5: 30-60万，6: 60-100万，100万以上
+    int32 income = 10; 
+    // 0 未选择
+    // 1 未购房
+    // 2 已购房
+    int32 estate = 11;
+    // 0 未选择
+    // 1 未购
+    // 2 已购
+    int32 car = 12;
+    string love_goal = 13;
+    string province = 14;
+    string city = 15;
+    string area = 16;
+    string work_province = 17;
+    string work_city = 18;
+    string work_area = 19;
+    //  1 公开 2 目标相同 3 不公开 
+    int32 love_goal_level = 24;
+}
+
+message VipInfo {
+    string deadline  = 1;
+}
+
+message Basic {
+    string  name       =  1;
+    string  avatar     =  2;
+    int32   age        =  3;
+    int32   height     =  4;
+    int32   weight     =  5;
+    string  telephone  =  6;
+    string  email      =  7;
+    string  realName   =  8;
+    string  id_card    =  9;
+    // 0 未选择 1 男 2 女
+    int32   sex        =  10;
+    string  birthday   =  11;
+}
+
+message CheckRpReq {
+    // 姓名
+    // @len_min:1
+    string name = 1;
+    // 身份证
+    // @len_min:1
+    string card_no =2;
+    // 人像 二进制流 base64
+    // @len_min:1
+    string avatar = 3;
+}
+
+message InfoReq {
+    // int64 uid = 1;
+}
+
+message InfoResp {
+    int32 code = 1;
+    string msg = 2;
+    Info data = 3;
+}
+
+message Info {
+    Basic basic = 1;
+    string background = 2;
+    string voice = 3;
+    string intro = 4;
+    repeated Label labels = 5;
+    string constellation = 6; // 星座
+    // 职业 职位列表：https://github.com/PowersYang/Industry-Job/blob/master/industry.json 
+    string job_occupation = 7;
+    // 学历 0 未选择 1 大专以下，2 大专，3 本科，4 硕士，5 博士。
+    int32 education = 8;
+    // https://github.com/codeudan/crawler-china-mainland-universities/blob/master/china_mainland_universities.json
+    string school = 9;
+    // 0: 没有选择
+    // 1: 5万以下 2: 5-10万，3: 10-20万，4: 20-30万，5: 30-60万，6: 60-100万，100万以上
+    int32 income = 10; 
+    // 0 未选择
+    // 1 未购房
+    // 2 已购房
+    int32 estate = 11;
+    // 0 未选择
+    // 1 未购
+    // 2 已购
+    int32 car = 12;
+    string love_goal = 13;
+    VipInfo vip_info = 14;
+    string province = 15;
+    string city = 16;
+    string area = 17;
+    int64 id = 18;
+    string live_brief = 19;
+    repeated string live_photos = 20;
+    string work_province = 21;
+    string work_city = 22;
+    string work_area = 23;
+    //  1 公开 2 目标相同 3 不公开 
+    int32 love_goal_level = 24;
+}
+
+message Info_bck {
+    int64        id             = 1;
+    string       name           = 2;
+    string       avatar         = 3;
+    string       telephone      = 4;
+    string       email          = 5;
+    string       realName       = 6;
+    string       id_card        = 7;
+    string       backgroud      = 8;
+    bool         is_vip         = 9;
+    int32        age            = 10;
+    string       voice          = 11;
+    string       intro          = 12;
+    repeated string labels      = 13;
+    int32        height         = 14;
+    string       constellation  = 15;
+    string       job_occupation = 16;
+    string       education      = 17;
+    string       school         = 18;
+    string       income         = 19;
+    string       estate         = 20;
+    int32        car            = 21;
+    string       homedown       = 22;
+    string       residence      = 23;
+    int32        marital_status = 24;
+    string       love_goal      = 25;
+}
+
+
+message ReportLocationReq{
+    // 经度
+    double longitude = 1;
+    // 纬度
+    double latitude = 2;
+    // 位置
+    string location = 3;
+}
+
+message DefaultEmptyResp{
+    int32 code = 1;
+    string msg = 2;
+    EmptyData data = 3;
+}
+
+message EmptyData {
+
+}
