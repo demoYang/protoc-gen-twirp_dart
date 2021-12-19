@@ -13,3 +13,5 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	google.golang.org/protobuf v1.26.0 // indirect
 )
+
+replace github.com/demoYang/protoc-gen-twirp_dart => protoc-gen-twirp_dart
