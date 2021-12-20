@@ -14,4 +14,4 @@ require (
 	google.golang.org/protobuf v1.26.0 // indirect
 )
 
-replace github.com/demoYang/protoc-gen-twirp_dart => ./protoc-gen-twirp_dart
+replace github.com/apptreesoftware/protoc-gen-twirp_dart v0.0.0-20211219143729-ba7b967b6abe => github.com/demoYang/protoc-gen-twirp_dart v0.0.0-20211219143729-ba7b967b6abe
