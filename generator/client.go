@@ -36,10 +36,10 @@ class {{.Name}} {
 	factory {{.Name}}.fromJson(Map<String,dynamic> json) {
 		{{- range .Fields -}}
 			{{if .IsMap}}
-			var {{.Name}}Map = new {{.Type}}();
-			(json['{{.JSONName}}'] as Map<String, dynamic>)?.forEach((key, val) {
+			var {{.Name}}Map = {{.Type}}();
+			(json['{{.JSONName}}'] as Map<String, dynamic>).forEach((key, val) {
 				{{if .MapValueField.IsMessage}}
-				{{.Name}}Map[key] = new {{.MapValueField.Type}}.fromJson(val as Map<String,dynamic>);
+				{{.Name}}Map[key] = {{.MapValueField.Type}}.fromJson(val as Map<String,dynamic>);
 				{{else}}
 				if (val is String) {
 					{{if eq .MapValueField.Type "double"}}
@@ -61,14 +61,14 @@ class {{.Name}} {
 			{{end}}
 		{{end}}
 
-		return new {{.Name}}(
+		return {{.Name}}(
 		{{- range .Fields -}}
 		{{if .IsMap}}
 		{{.Name}}Map,
 		{{else if and .IsRepeated .IsMessage}}
 		json['{{.JSONName}}'] != null
           ? (json['{{.JSONName}}'] as List)
-              .map((d) => new {{.InternalType}}.fromJson(d))
+              .map((d) => {{.InternalType}}.fromJson(d))
               .toList()
           : <{{.InternalType}}>[],
 		{{else if .IsRepeated }}
@@ -76,7 +76,7 @@ class {{.Name}} {
 		{{else if and (.IsMessage) (eq .Type "DateTime")}}
 		{{.Type}}.tryParse(json['{{.JSONName}}']),
 		{{else if .IsMessage}}
-		new {{.Type}}.fromJson(json['{{.JSONName}}']),
+	    {{.Type}}.fromJson(json['{{.JSONName}}']),
 		{{else}}
 		json['{{.JSONName}}'] as {{.Type}}, 
 		{{- end}}
@@ -85,14 +85,14 @@ class {{.Name}} {
 	}
 
 	Map<String,dynamic>toJson() {
-		var map = new Map<String, dynamic>();
+		var map = Map<String, dynamic>();
     	{{- range .Fields -}}
 		{{- if .IsMap }}
 		map['{{.JSONName}}'] = json.decode(json.encode({{.Name}}));
 		{{- else if and .IsRepeated .IsMessage}}
-		map['{{.JSONName}}'] = {{.Name}}?.map((l) => l.toJson())?.toList();
+		map['{{.JSONName}}'] = {{.Name}}.map((l) => l.toJson()).toList();
 		{{- else if .IsRepeated }}
-		map['{{.JSONName}}'] = {{.Name}}?.map((l) => l)?.toList();
+		map['{{.JSONName}}'] = {{.Name}}.map((l) => l).toList();
 		{{- else if and (.IsMessage) (eq .Type "DateTime")}}
 		map['{{.JSONName}}'] = {{.Name}}.toIso8601String();
 		{{- else if .IsMessage}}
@@ -121,12 +121,12 @@ abstract class {{.Name}} {
 
 class Default{{.Name}} implements {{.Name}} {
 	final String hostname;
-    Requester _requester;
+    late Requester _requester;
 	final _pathPrefix = "/twirp/{{.Package}}.{{.Name}}/";
 
-    Default{{.Name}}(this.hostname, {Requester requester}) {
+    Default{{.Name}}(this.hostname, {Requester? requester}) {
 		if (requester == null) {
-      		_requester = new Requester(new Client());
+      		_requester = Requester(Client());
     	} else {
 			_requester = requester;
 		}
@@ -136,7 +136,7 @@ class Default{{.Name}} implements {{.Name}} {
 	Future<{{.OutputType}}>{{.Name}}({{.InputType}} {{.InputArg}}) async {
 		var url = "${hostname}${_pathPrefix}{{.Path}}";
 		var uri = Uri.parse(url);
-    	var request = new Request('POST', uri);
+    	var request = Request('POST', uri);
 		request.headers['Content-Type'] = 'application/json';
     	request.body = json.encode({{.InputArg}}.toJson());
     	var response = await _requester.send(request);
@@ -151,9 +151,9 @@ class Default{{.Name}} implements {{.Name}} {
 	Exception twirpException(Response response) {
     	try {
       		var value = json.decode(utf8.decode(response.bodyBytes));
-      		return new TwirpJsonException.fromJson(value);
+      		return TwirpJsonException.fromJson(value);
     	} catch (e) {
-      		return new TwirpException(utf8.decode(response.bodyBytes));
+      		return TwirpException(utf8.decode(response.bodyBytes));
     	}
   	}
 }
@@ -553,7 +553,7 @@ func parse(f ModelField, modelName string) string {
 		singularType := f.Type[0 : len(f.Type)-2] // strip array brackets from type
 
 		if f.Type == "Date" {
-			return fmt.Sprintf("%s.map((n) => new Date(n))", field)
+			return fmt.Sprintf("%s.map((n) => Date(n))", field)
 		}
 
 		if f.IsMessage {
@@ -562,7 +562,7 @@ func parse(f ModelField, modelName string) string {
 	}
 
 	if f.Type == "Date" {
-		return fmt.Sprintf("new Date(%s)", field)
+		return fmt.Sprintf("Date(%s)", field)
 	}
 
 	if f.IsMessage {
