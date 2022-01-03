@@ -122,7 +122,7 @@ abstract class {{.Name}} {
 class Default{{.Name}} implements {{.Name}} {
 	final String hostname;
     late Requester _requester;
-	final _pathPrefix = "/twirp/{{.Package}}.{{.Name}}/";
+	final pathPrefix = "/twirp/{{.Package}}.{{.Name}}/";
 
     Default{{.Name}}(this.hostname, {Requester? requester}) {
 		if (requester == null) {
@@ -133,12 +133,17 @@ class Default{{.Name}} implements {{.Name}} {
 	}
 
     {{range .Methods}}
-	Future<{{.OutputType}}>{{.Name}}({{.InputType}} {{.InputArg}}) async {
-		var url = "${hostname}${_pathPrefix}{{.Path}}";
+	Future<{{.OutputType}}>{{.Name}}({{.InputType}} {{.InputArg}},{BaseRequest? customRequest}) async {
+		var url = "${hostname}${pathPrefix}{{.Path}}";
 		var uri = Uri.parse(url);
-    	var request = Request('POST', uri);
+    	var request;
+    	if(customRequest==null){
+    	request = Request('POST', uri);
 		request.headers['Content-Type'] = 'application/json';
     	request.body = json.encode({{.InputArg}}.toJson());
+    	}else{
+    	request=customRequest;
+    	}
     	var response = await _requester.send(request);
 		if (response.statusCode != 200) {
      		throw twirpException(response);
