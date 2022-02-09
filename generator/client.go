@@ -149,6 +149,11 @@ class Default{{.Name}} implements {{.Name}} {
      		throw twirpException(response);
     	}
     	var value = json.decode(utf8.decode(response.bodyBytes));
+        Map<String, dynamic> bodyMap = value;
+        int businessCode = bodyMap['code'] as int;
+        if (businessCode != 0) {
+          throw twirpException(response);
+        }
     	return {{.OutputType}}.fromJson(value);
 	}
     {{end}}
