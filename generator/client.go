@@ -24,13 +24,31 @@ import '{{.Path}}';
 {{- if not .Primitive}}
 class {{.Name}} {
 
-	{{.Name}}(
+	{{.Name}}({
 	{{range .Fields -}}
-		this.{{.Name}},
-	{{- end}});
+		{{if eq .Type  "String" }}
+			this.{{.Name}} = "",
+		{{else if eq .Type  "double" }}
+			this.{{.Name}} = 0.0,
+		{{else if eq .Type  "int" }}
+			this.{{.Name}} = 0,
+		{{else if eq .Type  "Int64" }}
+			this.{{.Name}} = Int64.ZERO,
+		{{else if .IsRepeated }}
+			this.{{.Name}} = const <{{.InternalType}}>[],
+		{{else if .IsMap }}
+			this.{{.Name}} = const <{{.InternalType}}> {},
+		{{else}}
+			this.{{.Name}},
+		{{end}}
+	{{- end}}});
 
     {{range .Fields -}}
-    {{.Type}} {{.Name}};
+		{{ if .IsMessage}} 
+    		{{.Type}}? {{.Name}};
+		{{else}}
+			{{.Type}} {{.Name}};
+		{{end}}
     {{end}}
 	
 	factory {{.Name}}.fromJson(Map<String,dynamic> json) {
@@ -66,19 +84,21 @@ class {{.Name}} {
 		{{if .IsMap}}
 		{{.Name}}Map,
 		{{else if and .IsRepeated .IsMessage}}
-		json['{{.JSONName}}'] != null
+		{{.Name}}:json['{{.JSONName}}'] != null
           ? (json['{{.JSONName}}'] as List)
               .map((d) => {{.InternalType}}.fromJson(d))
               .toList()
           : <{{.InternalType}}>[],
 		{{else if .IsRepeated }}
-		json['{{.JSONName}}'] != null ? (json['{{.JSONName}}'] as List).cast<{{.InternalType}}>() : <{{.InternalType}}>[],
+		{{.Name}}:json['{{.JSONName}}'] != null ? (json['{{.JSONName}}'] as List).cast<{{.InternalType}}>() : <{{.InternalType}}>[],
 		{{else if and (.IsMessage) (eq .Type "DateTime")}}
-		{{.Type}}.tryParse(json['{{.JSONName}}']),
+		{{.Name}}:{{.Type}}.tryParse(json['{{.JSONName}}']),
 		{{else if .IsMessage}}
-	    {{.Type}}.fromJson(json['{{.JSONName}}']??{}),
+	    {{.Name}}:{{.Type}}.fromJson(json['{{.JSONName}}']??{}),
+		{{else if eq .Type  "Int64"}}
+			{{.Name}}: Int64.parseInt( json['{{.JSONName}}'] ?? '0'), 
 		{{else}}
-		json['{{.JSONName}}'] as {{.Type}}, 
+		{{.Name}}:json['{{.JSONName}}'] as {{.Type}}, 
 		{{- end}}
 		{{- end}}
 		);	
@@ -90,13 +110,13 @@ class {{.Name}} {
 		{{- if .IsMap }}
 		map['{{.JSONName}}'] = json.decode(json.encode({{.Name}}));
 		{{- else if and .IsRepeated .IsMessage}}
-		map['{{.JSONName}}'] = {{.Name}}.map((l) => l.toJson()).toList();
+		map['{{.JSONName}}'] = {{.Name}}?.map((l) => l.toJson()).toList() ?? [];
 		{{- else if .IsRepeated }}
-		map['{{.JSONName}}'] = {{.Name}}.map((l) => l).toList();
+		map['{{.JSONName}}'] = {{.Name}}?.map((l) => l).toList() ?? [];
 		{{- else if and (.IsMessage) (eq .Type "DateTime")}}
 		map['{{.JSONName}}'] = {{.Name}}.toIso8601String();
 		{{- else if .IsMessage}}
-		map['{{.JSONName}}'] = {{.Name}}.toJson();
+		map['{{.JSONName}}'] = {{.Name}}?.toJson() ?? {};
 		{{- else}}
     	map['{{.JSONName}}'] = {{.Name}};
     	{{- end}}
@@ -467,13 +487,14 @@ func protoToDartType(f *descriptor.FieldDescriptorProto) (string, string, string
 	case descriptor.FieldDescriptorProto_TYPE_DOUBLE:
 		dartType = "double"
 		jsonType = "number"
-		break
 	case descriptor.FieldDescriptorProto_TYPE_FIXED32,
-		descriptor.FieldDescriptorProto_TYPE_FIXED64,
-		descriptor.FieldDescriptorProto_TYPE_INT32,
-		descriptor.FieldDescriptorProto_TYPE_INT64:
+		descriptor.FieldDescriptorProto_TYPE_INT32:
 		dartType = "int"
 		jsonType = "number"
+	case descriptor.FieldDescriptorProto_TYPE_FIXED64,
+		descriptor.FieldDescriptorProto_TYPE_INT64:
+		dartType = "Int64"
+		jsonType = "String"
 	case descriptor.FieldDescriptorProto_TYPE_STRING:
 		dartType = "String"
 		jsonType = "string"
