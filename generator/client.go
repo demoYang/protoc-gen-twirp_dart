@@ -103,7 +103,9 @@ class {{.Name}} {
 		{{else if and (.IsMessage) (eq .Type "DateTime")}}
 		{{.Name}}:{{.Type}}.tryParse(json['{{.JSONName}}']),
 		{{else if .IsMessage}}
-	    {{.Name}}:{{.Type}}.fromJson(json['{{.JSONName}}']??{}),
+	    {{.Name}}: json['{{.JSONName}}'] != null ? {{.Type}}.fromJson(json['{{.JSONName}}']) : null,
+		{{else if eq .Type  "double"}}
+			{{.Name}}:(json['{{.JSONName}}'] * 1.0) as {{.Type}},
 		{{else if eq .Type  "Int64"}}
 			{{.Name}}: Int64.parseInt( json['{{.JSONName}}'] ?? '0'), 
 		{{else}}
@@ -121,11 +123,13 @@ class {{.Name}} {
 		{{- else if and .IsRepeated .IsMessage}}
 		map['{{.JSONName}}'] = {{.Name}}?.map((l) => l.toJson()).toList() ?? [];
 		{{- else if .IsRepeated }}
-		map['{{.JSONName}}'] = {{.Name}}?.map((l) => l).toList() ?? [];
+		map['{{.JSONName}}'] = {{.Name}}.map((l) => l).toList();
 		{{- else if and (.IsMessage) (eq .Type "DateTime")}}
 		map['{{.JSONName}}'] = {{.Name}}.toIso8601String();
 		{{- else if .IsMessage}}
 		map['{{.JSONName}}'] = {{.Name}}?.toJson() ?? {};
+		{{- else if eq .Type  "Int64" }}
+		map['{{.JSONName}}'] = {{.Name}}.toString();
 		{{- else}}
     	map['{{.JSONName}}'] = {{.Name}};
     	{{- end}}
