@@ -39,10 +39,10 @@ class {{.Name}} {
 				this.{{.Name}} = false,
 			{{else if eq .Type  "Int64" }}
 				this.{{.Name}} = Int64.ZERO,
+			{{else if .IsMap }}
+				this.{{.Name}} = const  {},
 			{{else if .IsRepeated }}
 				this.{{.Name}} = const <{{.InternalType}}>[],
-			{{else if .IsMap }}
-				this.{{.Name}} = const <{{.InternalType}}> {},
 			{{else}}
 				this.{{.Name}},
 			{{end}}
@@ -72,6 +72,9 @@ class {{.Name}} {
 					{{if eq .MapValueField.Type "int"}}
 						{{.Name}}Map[key] = int.parse(val);
 					{{end}}
+					{{if eq .MapValueField.Type "bool"}}
+						{{.Name}}Map[key] = val.toLowerCase() == 'true';
+					{{end}}
 				} else if (val is num) {
 					{{if eq .MapValueField.Type "double"}}
 						{{.Name}}Map[key] = val.toDouble();
@@ -88,7 +91,7 @@ class {{.Name}} {
 		return {{.Name}}(
 		{{- range .Fields -}}
 		{{if .IsMap}}
-		{{.Name}}Map,
+		{{.Name}} : {{.Name}}Map,
 		{{else if and .IsRepeated .IsMessage}}
 		{{.Name}}:json['{{.JSONName}}'] != null
           ? (json['{{.JSONName}}'] as List)
@@ -264,6 +267,7 @@ func (ctx *APIContext) ApplyImports(d *descriptor.FileDescriptorProto) {
 		deps = append(deps, Import{"package:http/http.dart"})
 		deps = append(deps, Import{"package:requester/requester.dart"})
 		deps = append(deps, Import{"package:twirp_dart_core/twirp_dart_core.dart"})
+		deps = append(deps, Import{"package:fixnum/fixnum.dart"})
 	}
 	deps = append(deps, Import{"dart:convert"})
 
