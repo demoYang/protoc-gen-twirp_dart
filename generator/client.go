@@ -32,6 +32,8 @@ class {{.Name}} {
 			this.{{.Name}} = 0.0,
 		{{else if eq .Type  "int" }}
 			this.{{.Name}} = 0,
+		{{else if eq .Type  "bool" }}
+			this.{{.Name}} = false,
 		{{else if eq .Type  "Int64" }}
 			this.{{.Name}} = Int64.ZERO,
 		{{else if .IsRepeated }}
