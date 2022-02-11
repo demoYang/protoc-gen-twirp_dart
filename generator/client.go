@@ -24,26 +24,30 @@ import '{{.Path}}';
 {{- if not .Primitive}}
 class {{.Name}} {
 
-	{{.Name}}({
-	{{range .Fields -}}
-		{{if eq .Type  "String" }}
-			this.{{.Name}} = "",
-		{{else if eq .Type  "double" }}
-			this.{{.Name}} = 0.0,
-		{{else if eq .Type  "int" }}
-			this.{{.Name}} = 0,
-		{{else if eq .Type  "bool" }}
-			this.{{.Name}} = false,
-		{{else if eq .Type  "Int64" }}
-			this.{{.Name}} = Int64.ZERO,
-		{{else if .IsRepeated }}
-			this.{{.Name}} = const <{{.InternalType}}>[],
-		{{else if .IsMap }}
-			this.{{.Name}} = const <{{.InternalType}}> {},
-		{{else}}
-			this.{{.Name}},
-		{{end}}
-	{{- end}}});
+	{{ $length := len .Fields }} {{ if eq $length 0 }}
+		{{.Name}}();
+	{{ else }}
+		{{.Name}}({
+		{{range .Fields -}}
+			{{if eq .Type  "String" }}
+				this.{{.Name}} = "",
+			{{else if eq .Type  "double" }}
+				this.{{.Name}} = 0.0,
+			{{else if eq .Type  "int" }}
+				this.{{.Name}} = 0,
+			{{else if eq .Type  "bool" }}
+				this.{{.Name}} = false,
+			{{else if eq .Type  "Int64" }}
+				this.{{.Name}} = Int64.ZERO,
+			{{else if .IsRepeated }}
+				this.{{.Name}} = const <{{.InternalType}}>[],
+			{{else if .IsMap }}
+				this.{{.Name}} = const <{{.InternalType}}> {},
+			{{else}}
+				this.{{.Name}},
+			{{end}}
+		{{- end}}});
+	{{end}}
 
     {{range .Fields -}}
 		{{ if .IsMessage}} 
