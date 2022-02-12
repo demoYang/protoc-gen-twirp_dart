@@ -91,25 +91,27 @@ class {{.Name}} {
 		return {{.Name}}(
 		{{- range .Fields -}}
 		{{if .IsMap}}
-		{{.Name}} : {{.Name}}Map,
+			{{.Name}} : {{.Name}}Map,
 		{{else if and .IsRepeated .IsMessage}}
-		{{.Name}}:json['{{.JSONName}}'] != null
-          ? (json['{{.JSONName}}'] as List)
-              .map((d) => {{.InternalType}}.fromJson(d))
-              .toList()
-          : <{{.InternalType}}>[],
+			{{.Name}}:json['{{.JSONName}}'] != null
+			? (json['{{.JSONName}}'] as List)
+				.map((d) => {{.InternalType}}.fromJson(d))
+				.toList()
+			: <{{.InternalType}}>[],
 		{{else if .IsRepeated }}
-		{{.Name}}:json['{{.JSONName}}'] != null ? (json['{{.JSONName}}'] as List).cast<{{.InternalType}}>() : <{{.InternalType}}>[],
+			{{.Name}}:json['{{.JSONName}}'] != null ? (json['{{.JSONName}}'] as List).cast<{{.InternalType}}>() : <{{.InternalType}}>[],
 		{{else if and (.IsMessage) (eq .Type "DateTime")}}
-		{{.Name}}:{{.Type}}.tryParse(json['{{.JSONName}}']),
+			{{.Name}}:{{.Type}}.tryParse(json['{{.JSONName}}']),
 		{{else if .IsMessage}}
-	    {{.Name}}: json['{{.JSONName}}'] != null ? {{.Type}}.fromJson(json['{{.JSONName}}']) : null,
+	    	{{.Name}}: json['{{.JSONName}}'] != null ? {{.Type}}.fromJson(json['{{.JSONName}}']) : null,
 		{{else if eq .Type  "double"}}
 			{{.Name}}:(json['{{.JSONName}}'] * 1.0) as {{.Type}},
 		{{else if eq .Type  "Int64"}}
 			{{.Name}}: Int64.parseInt( json['{{.JSONName}}'] ?? '0'), 
+		{{else if eq .Type  "String"}}
+			{{.Name}}: (json['{{.JSONName}}'] ?? '') as {{.Type}} , 
 		{{else}}
-		{{.Name}}:json['{{.JSONName}}'] as {{.Type}}, 
+			{{.Name}}:json['{{.JSONName}}'] as {{.Type}}, 
 		{{- end}}
 		{{- end}}
 		);	
