@@ -131,7 +131,7 @@ class {{.Name}} {
 		{{- else if and (.IsMessage) (eq .Type "DateTime")}}
 		map['{{.JSONName}}'] = {{.Name}}.toIso8601String();
 		{{- else if .IsMessage}}
-		map['{{.JSONName}}'] = {{.Name}}?.toJson() ?? {};
+		map['{{.JSONName}}'] = {{.Name}}?.toJson();
 		{{- else if eq .Type  "Int64" }}
 		map['{{.JSONName}}'] = {{.Name}}.toString();
 		{{- else}}
